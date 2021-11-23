@@ -14,7 +14,8 @@ class Segment:
 
   def load_segmentation(self, bytes):
       self.load_bytes(bytes)
-      pass
+      self.data = self.bytes[12:]
+      self.seqnumber, self.acknumber, self.flag, self.checksum = struct.unpack("IIBxH", bytes[0:12])
 
   def load_data(self, data):
     self.data = data
@@ -38,32 +39,40 @@ class Segment:
     # calculate sum
     
     print("Converting message bytes into 16-bit chunks")
-    message_in_16bit = [self.bytes[i:i+16] for i in range(0, len(self.bytes), 16)]
+    message_in_16bit = [self.bytes[i:i+2] for i in range(0, len(self.bytes), 2)]
+    for chunk in message_in_16bit:
+      if len(chunk) == 1:
+        chunk += struct.pack("x")
     print(message_in_16bit)
     print("Taking the sum of chunks and applying one's complement")
     print("Storing checksum")
-    self.checksum = ~(sum(message_in_16bit) & 0xFF)
+    self.checksum = ~(sum(message_in_16bit) & 0xFFFF)
     print(self.checksum)
   
-  def validate_checksum(self):
+  def is_checksum_valid(self):
     # check using checksum
     # add checksum to final sum total
     # check if there is any 0 -> corrupt
     
-    total = (self.checksum + self.get_bytes()) & 0xFF
+    total = (self.checksum + self.get_bytes()) & 0xFFFF
     print(total)
+    return total == 0xFFFF
 
   def get_bytes(self):
-    seq_bytes = struct.pack("i", self.seqnumber)
-    ack_bytes = struct.pack("i", self.acknumber)
-    flag_bytes = struct.pack("b", self.flag)
-    empty_bytes = struct.pack("x")
-    self.checksum = self.generate_checksum()
-    data_bytes = self.data
-    checksum_bytes = struct.pack("H", self.checksum)
+    if self.bytes == b'':
+      seq_bytes = struct.pack("I", self.seqnumber)
+      ack_bytes = struct.pack("I", self.acknumber)
+      flag_bytes = struct.pack("B", self.flag)
+      empty_bytes = struct.pack("x")
+      self.checksum = self.generate_checksum()
+      data_bytes = self.data
+      checksum_bytes = struct.pack("H", self.checksum)
 
-    message_bytes = seq_bytes + ack_bytes + flag_bytes + empty_bytes + checksum_bytes + data_bytes
-    return message_bytes
+      message_bytes = seq_bytes + ack_bytes + flag_bytes + empty_bytes + checksum_bytes + data_bytes
+      self.bytes = message_bytes
+      return message_bytes
+
+    return self.bytes
 
   def set_flag(self, flag):
     if(flag == "SYN"):
