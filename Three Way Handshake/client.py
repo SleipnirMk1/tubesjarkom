@@ -1,13 +1,20 @@
 import socket
+import argparse
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Template sequence number
 SEQ = 1
 
+# Argument Parser
+parser = argparse.ArgumentParser(description="Client")
+parser.add_argument("port", type=int, help="Client port")
+parser.add_argument("path", type=str, help="Path penyimpanan berkas")
+args = parser.parse_args()
+port = args.port
+path = args.path
+
 def ThreeWayHandshakeClient():
-    # Connect to server
-    s.connect((socket.gethostname(), 1234))
 
     # Send SYN
     print("Three Way Handshake client start")
@@ -35,5 +42,7 @@ def ThreeWayHandshakeClient():
     print("Three Way Handshake client done")
     
 # Testing
+# Connect to server
+s.connect((socket.gethostname(), port))
 ThreeWayHandshakeClient()
-s.close()
+s.close() # Hapus close nya nanti
