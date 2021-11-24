@@ -29,6 +29,8 @@ class Segment:
       return "ACK"
     elif(self.flag == 0b00000010):
       return "SYN"
+    elif(self.flag == 0b00001010):
+      return "SYN-ACK"
 
   def get_data(self):
     return self.data
@@ -84,6 +86,9 @@ class Segment:
     elif(flag == "FIN"):
       print("Flag set to FIN")
       self.flag = 0b00000001
+    elif(flag == "SYN-ACK"):
+      print("Flag set to SYN-ACK")
+      self.flag = 0b00001010
     else:
       print("Invalid flag input")
       print("Flag set to NONE")

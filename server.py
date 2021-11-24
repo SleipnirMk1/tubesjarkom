@@ -1,5 +1,6 @@
 import socket
 import sys
+from segment import Segment
 
 # ngeGet file jadi binary, dipotong potong jadi beberapa bagian sesuai size
 def getFileAsBinary(file, size):
@@ -53,41 +54,37 @@ class Server:
 
   def three_way_handshake(self, address):
     # send message to start handshake
-      message = str.encode("Start handshake")
+      message = str.encode("START HANDSHAKE")
       self.server.sendto(message, address)
       print("Three Way Handshake server start")
 
-      # Template sequence number, ganti jadi pake segment
-      SEQ = 5
-
       # Receive SYN
       SYN, address = self.server.recvfrom(self.buffer_size)
-      print("Receiving SYN from {}".format(address))
-
-      # Decode SYN template, ganti jadi pake segment
-      #receive = SYN.decode('utf-8')
-      receive = SYN
-      receive_arr = [int(i) for i in receive.split() if i.isdigit()]
-      SYN = receive_arr[0]
-      print("SYN received: ", SYN)
+      # Decode SYN
+      msg = Segment()
+      msg.load_segmentation(SYN)
+      if msg.get_flag_type() == "SYN":
+          print("SYN Received from {}".format(address))
+      else:
+          return False    # Kalau gagal
 
       # Send SYN-ACK
-      print("Sending SYN-ACK to {}".format(address))
-      ACK = SYN + 1
-      message = str(SEQ) + " " + str(ACK)
-      message = str.encode(message)
-      self.server.sendto(message, address)
+      print("Sending SYN-ACK")
+      # SYN-ACK Segment
+      msg = Segment()
+      msg.set_flag("SYN-ACK")
+      bytesToSend = msg.get_bytes()
+      self.server.sendto(bytesToSend, (serverAddressPort, port))
 
       # Receive ACK
       ACK, address = self.server.recvfrom(self.buffer_size)
-      print("Receiving ACK from {}".format(address))
-
-      # Decode ACK template, ganti jadi pake segment
-      #receive = ACK.decode('utf-8')
-      receive = ACK
-      receive_arr = [int(i) for i in receive.split() if i.isdigit()]
-      ACK = receive_arr[0]
-      print("ACK received: ", ACK)
+      # Decode SYN
+      msg = Segment()
+      msg.load_segmentation(ACK)
+      if msg.get_flag_type() == "ACK":
+          print("ACK Received from {}".format(address))
+      else:
+          return False    # Kalau gagal
         
       # Done
       print("Three Way Handshake server done with {}".format(address))
