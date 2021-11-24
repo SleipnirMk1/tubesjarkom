@@ -1,28 +1,16 @@
 import socket
-from segment import Segment
 
-def getFileAsBinary(file, size):
-    piece = []
-    try:
-        reader = open(file, "rb")
-    except IOError:
-        print('Unable to open', file)
-        return piece
-    while True:
-        tmpPiece = reader.read(size)
-        if(tmpPiece == b''):
-            break
-        else:
-            piece.append(tmpPiece)
-    return piece
-    
-serverAddressPort= ("127.0.0.2", 12345)
-UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-UDPClientSocket.bind(serverAddressPort)
-bufferSize = 128
+# socket UDP
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+# bind server
+server_socket.bind(('localhost', 8000))
+
+bufferSize = 1024
+msgFromServer       = "Hello UDP Client"
+bytesToSend         = str.encode(msgFromServer)
 
 #piece = getFileAsBinary("test.txt", bufferSize)
-piece = ['yes', 'bisa', 'seharusnya', 'ya', 'disini', 'mah', 'cuma', 'buat', 'ngebacot', 'yaudah', 'gas', 'dikit', 'lagi', 'selesai']
+piece = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13']
 
 #ntar dibenerin
 n = 4               #window size
@@ -31,30 +19,46 @@ sm = n-1            #sequence max
 sn = 0              #sequence number
 nPack = len(piece)  #number of packet
 
-addr = ("127.0.0.2", 12345)
+print("Server up")
 
-print('Sending ', str(nPack) , ' Packet...')
-while sb < nPack:
-    print('a')
-    msg, addr = UDPClientSocket.recvfrom(bufferSize)
-    #ambil rn dari packet
-    #rn = blablablablabla
-    rn = int(msg)
-    print('b')
-    if(True):
-        print("Receive ACK on packet ", rn)
-        sb = rn
-        sm = rn + n - 1
-    print('b')
-    while(sb<=sn and sn<=sm):
-        print('c')
-        #Proses ngirim packet
-        #...
-        #...
-        UDPClientSocket.sendto(str.encode(piece[sn]), addr)
-        print('d')
-        sn+=1
-print('SELESAI')
+listen = True
+while(listen):
+    print("Server is listening")
+    bytesAddressPair = server_socket.recvfrom(bufferSize)
+    message = bytesAddressPair[0]
+    address = bytesAddressPair[1]
+
+    clientMsg = "Message from Client:{}".format(message)
+    clientIP = "Client IP Address:{}".format(address)
+
+    print(clientMsg)
+    print(clientIP)
+    sb = 0              #sequence base
+    sm = n-1            #sequence max
+    sn = 0              #sequence number
+
+    server_socket.sendto(bytesToSend, address)
+    if(address):
+        print('Sending ', str(nPack) , ' Packet...')
+        while sb < nPack:
+            while(sb<=sn and sn<=min(sm,nPack-1)):
+                #Proses ngirim packet
+                #...
+                #...
+                print(sn)
+                server_socket.sendto(str.encode(piece[sn]), address)
+                sn+=1
+            msg, address = server_socket.recvfrom(bufferSize)
+            #ambil rn dari packet
+            #rn = blablablablabla
+            rn = int(msg)
+            if(msg):
+                print("Receive ACK on packet ", rn)
+                sb = rn
+                sm = rn + n - 1
+        msg, address = server_socket.recvfrom(bufferSize)
+        print(print("Receive ACK on packet ", rn))
+        print('SELESAI')
         
 
 

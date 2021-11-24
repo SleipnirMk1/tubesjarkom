@@ -1,14 +1,22 @@
 import socket
-from segment import Segment
 
-serverAddressPort   = ("127.0.0.1", 12345)
+msgFromClient       = "Hello UDP Server"
+bytesToSend         = str.encode(msgFromClient)
+serverAddressPort   = ("127.0.0.1", 8000)
 bufferSize          = 1024
-sizeAllowed         = 32768
+
+UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
 
 piece = []          #data yang sudah diambil
 rn = 0              #request number
-UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-UDPClientSocket.bind(serverAddressPort)
+
+UDPClientSocket.bind(('127.0.0.2', 12345))
+UDPClientSocket.sendto(bytesToSend, serverAddressPort)
+msg, addr = UDPClientSocket.recvfrom(bufferSize)
+print(msg)
+print(addr)
+
+print('Listening...')
 while (True):
     msg, addr = UDPClientSocket.recvfrom(bufferSize)
     
@@ -17,7 +25,11 @@ while (True):
     #if(is_checksum_valid and get_seq_number()==rn):
     if(True):
         #ini cuma buat test
-        if(msg=='selesai'):
+        if(msg==b'13'):
+            print('Mengirim ACK dengan request number ', rn)
+            msgFromClient       = str(rn+1)
+            bytesToSend         = str.encode(msgFromClient)
+            UDPClientSocket.sendto(bytesToSend, addr)
             print('Yes selesai')
             break
         #if(fin):
@@ -27,12 +39,10 @@ while (True):
         #...
         #...
         #piece.append(...)
-        print('Menerima Packet ', rn)
+        print('Menerima Packet ', rn+1)
         print('isinya: ', msg)
         rn+=1
-    else:
-        print('Terjadi error pada packet ', rn)
-    print('Mengirim ACK dengan request number ', rn)
+    print('Mengirim ACK dengan request number ', rn+1)
     #proses ngirim ack
     #packet = Segment()
     #packet.set_flag("ACK")
@@ -40,16 +50,8 @@ while (True):
     #server.sendto(packet.get_bytes, address)
 
     #ini cuma buat ngecek
-    msgFromClient       = str(rn)
+    msgFromClient       = str(rn+1)
     bytesToSend         = str.encode(msgFromClient)
-    UDPClientSocket.sendto(bytesToSend, serverAddressPort)
+    UDPClientSocket.sendto(bytesToSend, addr)
     print('Berhasil mengirim ACK')
-
-#end while
-#Harusnya selesain handshake dulu di sini
-
-#Proses pembentukan file
-#...
-#...
-#...
 print('selesai')
