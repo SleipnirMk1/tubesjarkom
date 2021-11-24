@@ -39,7 +39,7 @@ class Segment:
     # calculate sum
     
     print("Converting message bytes into 16-bit chunks")
-    message_in_16bit = [self.bytes[i:i+2] for i in range(0, len(self.bytes), 2)]
+    message_in_16bit = [self.data[i:i+2] for i in range(0, len(self.data), 2)]
     for chunk in message_in_16bit:
       if len(chunk) == 1:
         chunk += struct.pack("x")
@@ -64,8 +64,8 @@ class Segment:
       ack_bytes = struct.pack("I", self.acknumber)
       flag_bytes = struct.pack("B", self.flag)
       empty_bytes = struct.pack("x")
-      self.checksum = self.generate_checksum()
       data_bytes = self.data
+      self.checksum = self.generate_checksum()
       checksum_bytes = struct.pack("H", self.checksum)
 
       message_bytes = seq_bytes + ack_bytes + flag_bytes + empty_bytes + checksum_bytes + data_bytes
