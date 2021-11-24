@@ -18,7 +18,7 @@ path = args_list[2]
 def ThreeWayHandshakeClient():
     # Send SYN
     print("Three Way Handshake client start")
-    print("Sending SYN")
+    print("Sending SYN, connecting")
     # SYN Segment
     msg = Segment()
     msg.set_flag("SYN")
@@ -49,10 +49,4 @@ def ThreeWayHandshakeClient():
     return True
 
 # Testing
-# Send to server using created UDP socket
-UDPClientSocket.sendto(bytesToSend, (serverAddressPort, port))
-
-# Handshake
-print("Waiting to start handshake")
-start_handshake, addr = UDPClientSocket.recvfrom(bufferSize)
 ThreeWayHandshakeClient()

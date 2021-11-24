@@ -39,7 +39,7 @@ class Server:
     listening_for_clients = True
     while listening_for_clients:
       msg, addr = self.server.recvfrom(self.buffer_size)
-      print("[!] Connection from {} estabished".format(addr))
+      print("[!] SYN received from {}".format(addr))
       # add to list of clients
       self.connections.append(addr)
       # check if more clients
@@ -53,23 +53,8 @@ class Server:
       print("{}. {}".format(i+1, self.connections[i]))
 
   def three_way_handshake(self, address):
-    # send message to start handshake
-      message = str.encode("START HANDSHAKE")
-      self.server.sendto(message, address)
-      print("Three Way Handshake server start")
-
-      # Receive SYN
-      SYN, address = self.server.recvfrom(self.buffer_size)
-      # Decode SYN
-      msg = Segment()
-      msg.load_segmentation(SYN)
-      if msg.get_flag_type() == "SYN" and msg.is_checksum_valid():
-          print("SYN Received from {}".format(address))
-      else:
-          return False    # Kalau gagal
-
       # Send SYN-ACK
-      print("Sending SYN-ACK")
+      print("Sending SYN-ACK to {}".format(address))
       # SYN-ACK Segment
       msg = Segment()
       msg.set_flag("SYN-ACK")
