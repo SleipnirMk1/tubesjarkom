@@ -119,6 +119,8 @@ class Server:
       msg.set_headers(nPack,0)
       bytesToSend = msg.get_bytes()
       self.server.sendto(bytesToSend, client)
+    # ambil file dan segmentasi
+    # kirim pake algoritma Go-Back-N
 
 if __name__ == "__main__":
   # parse arguments
