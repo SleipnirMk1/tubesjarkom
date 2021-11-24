@@ -50,6 +50,7 @@ class Segment:
     print("Storing checksum")
     self.checksum = ~(sum(message_in_16bit) & 0xFFFF)
     print(self.checksum)
+    print(type(self.checksum))
   
   def is_checksum_valid(self):
     # check using checksum
@@ -67,8 +68,8 @@ class Segment:
       flag_bytes = struct.pack("B", self.flag)
       empty_bytes = struct.pack("x")
       data_bytes = self.data
-      self.checksum = self.generate_checksum()
-      checksum_bytes = struct.pack("H", self.checksum)
+      self.generate_checksum()
+      checksum_bytes = struct.pack("h", self.checksum)
 
       message_bytes = seq_bytes + ack_bytes + flag_bytes + empty_bytes + checksum_bytes + data_bytes
       self.bytes = message_bytes
