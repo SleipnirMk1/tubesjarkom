@@ -22,7 +22,6 @@ def ThreeWayHandshakeClient():
     # SYN Segment
     msg = Segment()
     msg.set_flag("SYN")
-    msg.generate_checksum()
     bytesToSend = msg.get_bytes()
     UDPClientSocket.sendto(bytesToSend, (serverAddressPort, port))
 
