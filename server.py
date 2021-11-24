@@ -1,6 +1,18 @@
 import socket
 import sys
 
+# ngeGet file jadi binary, dipotong potong jadi beberapa bagian sesuai size
+def getFileAsBinary(file, size):
+    reader = open(file, "rb")
+    piece = []
+    while True:
+        tmpPiece = file.read(size)
+        if(tmpPiece == b''):
+            break
+        else:
+            piece.append(tmpPiece)
+    return piece
+
 class Server:
   def __init__(self, port, file_path) -> None:
     # init server
