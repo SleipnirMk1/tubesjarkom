@@ -63,7 +63,7 @@ class Server:
       # Decode SYN
       msg = Segment()
       msg.load_segmentation(SYN)
-      if msg.get_flag_type() == "SYN":
+      if msg.get_flag_type() == "SYN" and msg.is_checksum_valid():
           print("SYN Received from {}".format(address))
       else:
           return False    # Kalau gagal
