@@ -93,3 +93,9 @@ class Segment:
   def set_headers(self, sequence_number, ack_number):
     self.seqnumber = sequence_number
     self.acknumber = ack_number
+
+  def get_seqnumber(self):
+    return self.seqnumber
+
+  def get_acknumber(self):
+    return self.acknumber

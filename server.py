@@ -81,30 +81,6 @@ class Server:
     # ambil file dan segmentasi
     # kirim pake algoritma Go-Back-N
 
-
-
-# bufferSize = 1024
-# msgFromServer       = "Hello UDP Client"
-# bytesToSend         = str.encode(msgFromServer)
-
-# print("Server up")
-
-
-# listen = True
-# while(listen):
-#   print("Server is listening")
-#   bytesAddressPair = server_socket.recvfrom(bufferSize)
-#   message = bytesAddressPair[0]
-#   address = bytesAddressPair[1]
-
-#   clientMsg = "Message from Client:{}".format(message)
-#   clientIP = "Client IP Address:{}".format(address)
-
-#   print(clientMsg)
-#   print(clientIP)
-
-#   server_socket.sendto(bytesToSend, address)
-
 if __name__ == "__main__":
   # parse arguments
   args_list = (str(sys.argv))
