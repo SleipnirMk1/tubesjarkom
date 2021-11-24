@@ -74,7 +74,7 @@ class Server:
       msg = Segment()
       msg.set_flag("SYN-ACK")
       bytesToSend = msg.get_bytes()
-      self.server.sendto(bytesToSend, (serverAddressPort, port))
+      self.server.sendto(bytesToSend, address)
 
       # Receive ACK
       ACK, address = self.server.recvfrom(self.buffer_size)
