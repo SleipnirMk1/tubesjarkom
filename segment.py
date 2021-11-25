@@ -44,15 +44,12 @@ class Segment:
     checksum = (self.seqnumber + self.acknumber + self.flag + self.checksum) & 0xFFFF
     print("Converting data bytes into 16-bit chunks")
     message_in_16bit = [self.data[i:i+2] for i in range(0, len(self.data), 2)]
-    for chunk in message_in_16bit:
-      if len(chunk) == 1:
-        chunk += struct.pack("x")
+    converted_message = [chunk + struct.pack("x") if len(chunk) == 1 else chunk for chunk in message_in_16bit ]
     print("Taking the sum of chunks and applying one's complement")
     print("Storing checksum")
-    self.checksum = 0xFFFF - ((sum([struct.unpack("H", a)[0] for a in message_in_16bit]) & 0xFFFF) + checksum)
+    self.checksum = 0xFFFF - ((sum([struct.unpack("H", chunk)[0] for chunk in converted_message]) & 0xFFFF) + checksum)
   
   def is_checksum_valid(self):
-
     self.generate_checksum()
     return self.checksum == 0x0000
 
