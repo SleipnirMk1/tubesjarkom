@@ -30,13 +30,11 @@ def receive_file():
             continue
         # If the flag is FIN, finished
         if(msg.get_flag_type() == "FIN"):
-            print('z')
             break
         
         message = Segment()
         message.set_flag("ACK")
         # changing and keep data if valid and seqnumber == rn
-        print(msg.get_seqnumber())
         if(msg.is_checksum_valid() and msg.get_seqnumber() == rn):
             print("[Segment SEQ=",msg.get_seqnumber(),"] Received")
             piece.append(msg.get_data())
