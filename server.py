@@ -87,9 +87,9 @@ class Server:
       sm = n-1            #sequence max
       sn = 0              #sequence number
       piece = getFileAsBinary(self.file_path, 32768)
-      print(piece)
       nPack = len(piece)  #number of packet
       print("Sending ", str(nPack), ' Packet to client ', client)
+      counter = 0
       while sb < nPack:
         while(sb<=sn and sn<=min(sm,nPack-1)):
           msg = Segment()
@@ -110,9 +110,13 @@ class Server:
             print("[Segment SEQ=", message.get_acknumber(),"] Acked")
             sb = message.get_acknumber() + 1
             sm = message.get_acknumber() + n
+            counter = 0
           else:
+            counter+=1
             print("[Segment SEQ=", message.get_acknumber(),"] NOT ACKED. Duplicate Ack found.")
-            sn = sb
+            if(counter>=3):
+                print("[!]Sending over the base packet, ", sb)
+                sn=sb
       print('FINISHED SENDING FILE TO ', client)
       msg = Segment()
       msg.set_flag("FIN")

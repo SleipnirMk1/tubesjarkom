@@ -22,20 +22,21 @@ def receive_file():
     print('Waiting for server to send packet...')
     while(True):
         packet, addr = UDPClientSocket.recvfrom(bufferSize)
-        print(packet)
-        print(addr)
         msg = Segment()
         msg.load_segmentation(packet)
         # If the sender is different, pass
         if(addr != serverAddressPort):
+            print('THERE IS ANOTHER CONNECTION')
             continue
         # If the flag is FIN, finished
         if(msg.get_flag_type() == "FIN"):
+            print('z')
             break
         
         message = Segment()
         message.set_flag("ACK")
         # changing and keep data if valid and seqnumber == rn
+        print(msg.get_seqnumber())
         if(msg.is_checksum_valid() and msg.get_seqnumber() == rn):
             print("[Segment SEQ=",msg.get_seqnumber(),"] Received")
             piece.append(msg.get_data())
@@ -56,7 +57,6 @@ def receive_file():
             print("Ack the latest Acked sequence")
     print("File completely received")
     print("Saving file to the requested directory ", path)
-    print(piece)
     try:
         writer = open(path, "wb")
         for binary in piece:
