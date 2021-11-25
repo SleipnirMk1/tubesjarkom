@@ -68,42 +68,56 @@ def receive_file():
 
 def ThreeWayHandshakeClient():
     # Send SYN
-    print("Three Way Handshake client start")
-    print("Sending SYN")
-    # SYN Segment
-    msg = Segment()
-    msg.set_flag("SYN")
-    bytesToSend = msg.get_bytes()
-    UDPClientSocket.sendto(bytesToSend, serverAddressPort)
-    print("Waiting for SYN-ACK...")
+    UDPClientSocket.settimeout(5)
+    try:
+        print("Three Way Handshake client start")
+        print("Sending SYN")
+        # SYN Segment
+        msg = Segment()
+        msg.set_flag("SYN")
+        # SEQ = 0
+        SEQ = 0
+        msg.set_headers(SEQ, 0)
+        bytesToSend = msg.get_bytes()
+        UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
-    # Receive SYN-ACK
-    SYNACK, address = UDPClientSocket.recvfrom(bufferSize)
-    # Decode SYN-ACK
-    msg = Segment()
-    msg.load_segmentation(SYNACK)
-    if msg.get_flag_type() == "SYN-ACK":
-        print("SYN-ACK Received")
-    else:
-        return False    # Kalau gagal
+        # Receive SYN-ACK
+        SYNACK, address = UDPClientSocket.recvfrom(bufferSize)
+        # Decode SYN-ACK
+        msg = Segment()
+        msg.load_segmentation(SYNACK)
+        if msg.get_flag_type() == "SYN-ACK" and msg.get_acknumber() == (SEQ+1):
+            print("Correct SYN-ACK Received")
+        else:
+            return False    # Kalau gagal
 
-    # Send ACK
-    print("Sending ACK")
-    # ACK Segment
-    msg = Segment()
-    msg.set_flag("ACK")
-    bytesToSend = msg.get_bytes()
-    UDPClientSocket.sendto(bytesToSend, serverAddressPort)
+        # Get server SEQ
+        server_SEQ = msg.get_seqnumber()
+        ACK = server_SEQ + 1
 
-    # Done
-    print("Three Way Handshake client done")
+        # Send ACK
+        print("Sending ACK")
+        # ACK Segment
+        msg = Segment()
+        msg.set_flag("ACK")
+        msg.set_headers(0, ACK)
+        bytesToSend = msg.get_bytes()
+        UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
-    return True
+        # Done
+        print("Three Way Handshake client done")
+        UDPClientSocket.settimeout(None)
 
-# Testing
-ThreeWayHandshakeClient()
+        return True
+
+    except socket.timeout:
+        print("Socket timeout")
+
+# three way
+connected = ThreeWayHandshakeClient()
 
 # Go-Back-N ARQ
-receive_file()
+if connected:
+    receive_file()
 
 

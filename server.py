@@ -42,10 +42,14 @@ class Server:
     print("Listening to broadcast address for clients")
     listening_for_clients = True
     while listening_for_clients:
-      msg, addr = self.server.recvfrom(self.buffer_size)
-      print("[!] SYN received from {}".format(addr))
-      # add to list of clients
-      self.connections.append(addr)
+      addr = self.three_way_handshake()
+      # check if handshake was unsuccessful
+      if (addr == False):
+        print("Handshake failed")
+      else:
+        # add to list of clients
+        print("Connection success")
+        self.connections.append(addr)
       # check if more clients
       listen_more = input("[?] Listen more? (y/n): ")
       if listen_more == "n":
@@ -56,32 +60,57 @@ class Server:
     for i in range(len(self.connections)):
       print("{}. {}".format(i+1, self.connections[i]))
 
-  def three_way_handshake(self, address):
+  def three_way_handshake(self):
+    try:
+      # SYN received
+      SYN, address = self.server.recvfrom(self.buffer_size)
+      print("Start three way handshake server")
+      print("SYN Received from {}".format(address))
+      msg = Segment()
+      msg.load_segmentation(SYN)
+      ACK = msg.get_seqnumber() + 1
+
       # Send SYN-ACK
       print("Sending SYN-ACK to {}".format(address))
       # SYN-ACK Segment
       msg = Segment()
+      # SEQ = 0
+      SEQ = 0
       msg.set_flag("SYN-ACK")
+      msg.set_headers(SEQ, ACK)
       bytesToSend = msg.get_bytes()
       self.server.sendto(bytesToSend, address)
 
       # Receive ACK
+      self.server.settimeout(5)
       ACK, address = self.server.recvfrom(self.buffer_size)
       # Decode SYN
       msg = Segment()
       msg.load_segmentation(ACK)
-      if msg.get_flag_type() == "ACK":
-          print("ACK Received from {}".format(address))
+      if msg.get_flag_type() == "ACK" and msg.get_acknumber() == (SEQ+1):
+        print("Correct ACK Received from {}".format(address))
       else:
-          return False    # Kalau gagal
+        self.server.settimeout(None)
+        return False    # Kalau gagal
         
       # Done
       print("Three Way Handshake server done with {}".format(address))
+      self.server.settimeout(None)
+      return address
+
+    except socket.timeout:
+      self.server.settimeout(None)
+      print("Timeout")
+      return False
+    
+    except :
+      self.server.settimeout(None)
+      print("Connection error")
+      return False
 
   def send_file(self):
     # handshake to all clients in list
     for client in self.connections:
-      self.three_way_handshake(client)
       n = 4               #window size
       sb = 0              #sequence base
       sm = n-1            #sequence max
